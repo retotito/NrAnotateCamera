@@ -51,9 +51,10 @@ class CameraActivity : AppCompatActivity() {
     
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
-        // The ConstraintLayout will automatically reposition the overlay
-        // to bottom-right corner for both portrait and landscape
+        // Update target rotation for image capture when orientation changes
+        imageCapture?.targetRotation = binding.previewView.display.rotation
         Log.d(TAG, "Configuration changed to: ${if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) "Landscape" else "Portrait"}")
+        Log.d(TAG, "Updated target rotation to: ${binding.previewView.display.rotation}")
     }
     
     private fun setupClickListeners() {
@@ -95,14 +96,16 @@ class CameraActivity : AppCompatActivity() {
             
             // Preview
             val preview = Preview.Builder()
+                .setTargetRotation(binding.previewView.display.rotation)
                 .build()
                 .also {
                     it.setSurfaceProvider(binding.previewView.surfaceProvider)
                 }
             
-            // ImageCapture
+            // ImageCapture with proper rotation handling
             imageCapture = ImageCapture.Builder()
                 .setCaptureMode(ImageCapture.CAPTURE_MODE_MAXIMIZE_QUALITY)
+                .setTargetRotation(binding.previewView.display.rotation)
                 .build()
             
             // Select back camera as a default
@@ -213,17 +216,16 @@ class CameraActivity : AppCompatActivity() {
                 val mutableBitmap = originalBitmap.copy(Bitmap.Config.ARGB_8888, true)
                 val canvas = Canvas(mutableBitmap)
                 
-                // Calculate overlay size based on image dimensions
+                // Calculate overlay size - reduced by 40% as requested
                 val scaleFactor = minOf(imageWidth, imageHeight) / 1000f
-                val baseWidth = 616
-                val baseHeight = 328
-                val numberWidth = (baseWidth * scaleFactor).toInt().coerceAtLeast(300)
-                val numberHeight = (baseHeight * scaleFactor).toInt().coerceAtLeast(150)
+                val baseWidth = (616 * 0.6).toInt()  // 40% reduction: 616 * 0.6 = 370
+                val baseHeight = (328 * 0.6).toInt() // 40% reduction: 328 * 0.6 = 197
+                val numberWidth = (baseWidth * scaleFactor).toInt().coerceAtLeast(180)  // Reduced minimum
+                val numberHeight = (baseHeight * scaleFactor).toInt().coerceAtLeast(90) // Reduced minimum
                 
                 val margin = 20 // Small margin from edges
                 
                 // Always position in bottom-right of the actual saved image
-                // regardless of device orientation vs image orientation mismatch
                 val x = imageWidth - numberWidth - margin
                 val y = imageHeight - numberHeight - margin
                 

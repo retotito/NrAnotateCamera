@@ -166,12 +166,12 @@ EASIEST METHOD - Test Camera Choice:
 • Tap "Always" (NOT "Just once")
 
 SETTINGS METHOD (varies by phone):
-📱 Samsung: Settings → Apps → Choose default apps → Camera app
-📱 Google/Pixel: Settings → Apps → Default apps → Camera app  
-📱 OnePlus: Settings → Apps → App management → Default app settings → Camera
-📱 Xiaomi/MIUI: Settings → Manage apps → Permissions → Camera → Choose default
-📱 Huawei: Settings → Apps → Default apps → Camera
-📱 General: Settings → Apps → Default apps → Camera
+Samsung: Settings → Apps → Choose default apps → Camera app
+Google/Pixel: Settings → Apps → Default apps → Camera app  
+OnePlus: Settings → Apps → App management → Default app settings → Camera
+Xiaomi/MIUI: Settings → Manage apps → Permissions → Camera → Choose default
+Huawei: Settings → Apps → Default apps → Camera
+General: Settings → Apps → Default apps → Camera
 
 ALTERNATIVE METHOD:
 • Open any app that needs camera (WhatsApp, Instagram)

@@ -128,6 +128,9 @@ class CameraActivity : AppCompatActivity() {
     private fun takePhoto() {
         val imageCapture = imageCapture ?: return
         
+        // Capture current orientation for overlay positioning
+        val currentOrientation = resources.configuration.orientation
+        
         // Create time stamped name and MediaStore entry
         val name = generateFileName()
         val contentValues = ContentValues().apply {
@@ -163,7 +166,7 @@ class CameraActivity : AppCompatActivity() {
                 override fun onImageSaved(output: ImageCapture.OutputFileResults) {
                     // Post-process the image to add number overlay
                     output.savedUri?.let { uri ->
-                        addNumberOverlayToImage(uri)
+                        addNumberOverlayToImage(uri, currentOrientation)
                         
                         // Clear IS_PENDING flag for Android 10+
                         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
@@ -190,7 +193,7 @@ class CameraActivity : AppCompatActivity() {
         return "$currentDisplayNumber-$timestamp.jpg"
     }
     
-    private fun addNumberOverlayToImage(imageUri: android.net.Uri) {
+    private fun addNumberOverlayToImage(imageUri: android.net.Uri, deviceOrientation: Int) {
         try {
             // Read the original image
             val inputStream = contentResolver.openInputStream(imageUri)
@@ -198,26 +201,34 @@ class CameraActivity : AppCompatActivity() {
             inputStream?.close()
             
             if (originalBitmap != null) {
-                // Log image dimensions for debugging
-                Log.d(TAG, "Image dimensions: ${originalBitmap.width} x ${originalBitmap.height}")
+                val imageWidth = originalBitmap.width
+                val imageHeight = originalBitmap.height
+                val isImageLandscape = imageWidth > imageHeight
+                val isDeviceLandscape = deviceOrientation == Configuration.ORIENTATION_LANDSCAPE
+                
+                Log.d(TAG, "Image dimensions: ${imageWidth} x ${imageHeight} (${if (isImageLandscape) "landscape" else "portrait"})")
+                Log.d(TAG, "Device orientation: ${if (isDeviceLandscape) "landscape" else "portrait"}")
                 
                 // Create a mutable copy
                 val mutableBitmap = originalBitmap.copy(Bitmap.Config.ARGB_8888, true)
                 val canvas = Canvas(mutableBitmap)
                 
-                // Calculate number display position (bottom right corner)
-                // Scale overlay size based on image dimensions for better visibility
-                val scaleFactor = minOf(originalBitmap.width, originalBitmap.height) / 1000f
+                // Calculate overlay size based on image dimensions
+                val scaleFactor = minOf(imageWidth, imageHeight) / 1000f
                 val baseWidth = 616
                 val baseHeight = 328
                 val numberWidth = (baseWidth * scaleFactor).toInt().coerceAtLeast(300)
                 val numberHeight = (baseHeight * scaleFactor).toInt().coerceAtLeast(150)
                 
                 val margin = 20 // Small margin from edges
-                val x = mutableBitmap.width - numberWidth - margin
-                val y = mutableBitmap.height - numberHeight - margin
+                
+                // Always position in bottom-right of the actual saved image
+                // regardless of device orientation vs image orientation mismatch
+                val x = imageWidth - numberWidth - margin
+                val y = imageHeight - numberHeight - margin
                 
                 Log.d(TAG, "Overlay position: ($x, $y), size: ${numberWidth}x${numberHeight}")
+                Log.d(TAG, "Device vs Image orientation match: ${isDeviceLandscape == isImageLandscape}")
                 
                 // Draw number background and text
                 drawNumberOverlay(canvas, x.toFloat(), y.toFloat(), numberWidth, numberHeight)

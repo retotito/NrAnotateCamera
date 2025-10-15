@@ -1,0 +1,4 @@
+C:\Users\retok\Projects\NrAnotateCamera\app\src\main\java\com\fotocammera\NumberPickerDialog.kt
+C:\Users\retok\Projects\NrAnotateCamera\app\src\main\java\com\fotocammera\MainActivity.kt
+C:\Users\retok\Projects\NrAnotateCamera\app\src\main\java\com\fotocammera\CameraActivity.kt
+C:\Users\retok\Projects\NrAnotateCamera\app\src\main\java\com\fotocammera\utils\PreferencesManager.kt

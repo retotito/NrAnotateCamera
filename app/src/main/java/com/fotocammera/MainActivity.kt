@@ -275,7 +275,6 @@ ALTERNATIVE METHOD:
             requestPermissionsAndOpenCamera()
         }
     }
-    }
     
     private fun showPermissionDeniedDialog() {
         AlertDialog.Builder(this)

@@ -216,12 +216,12 @@ class CameraActivity : AppCompatActivity() {
                 val mutableBitmap = originalBitmap.copy(Bitmap.Config.ARGB_8888, true)
                 val canvas = Canvas(mutableBitmap)
                 
-                // Calculate overlay size - reduced by 40% as requested
+                // Calculate overlay size - further reduced by 35% from previous size
                 val scaleFactor = minOf(imageWidth, imageHeight) / 1000f
-                val baseWidth = (616 * 0.6).toInt()  // 40% reduction: 616 * 0.6 = 370
-                val baseHeight = (328 * 0.6).toInt() // 40% reduction: 328 * 0.6 = 197
-                val numberWidth = (baseWidth * scaleFactor).toInt().coerceAtLeast(180)  // Reduced minimum
-                val numberHeight = (baseHeight * scaleFactor).toInt().coerceAtLeast(90) // Reduced minimum
+                val baseWidth = (616 * 0.6 * 0.65).toInt()  // 40% + 35% reduction: 616 * 0.6 * 0.65 = 240
+                val baseHeight = (328 * 0.6 * 0.65).toInt() // 40% + 35% reduction: 328 * 0.6 * 0.65 = 128
+                val numberWidth = (baseWidth * scaleFactor).toInt().coerceAtLeast(120)  // Further reduced minimum
+                val numberHeight = (baseHeight * scaleFactor).toInt().coerceAtLeast(60) // Further reduced minimum
                 
                 val margin = 20 // Small margin from edges
                 

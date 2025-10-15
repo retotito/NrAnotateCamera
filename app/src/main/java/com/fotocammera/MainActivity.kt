@@ -6,6 +6,8 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
+import android.view.LayoutInflater
+import android.widget.CheckBox
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
@@ -64,8 +66,15 @@ class MainActivity : AppCompatActivity() {
     
     private fun checkFirstLaunch() {
         if (preferencesManager.isFirstLaunch()) {
+            // First launch - show the default camera dialog
             showSetDefaultDialog()
             preferencesManager.setFirstLaunchCompleted()
+        } else if (!preferencesManager.isDontAskAgainDefault()) {
+            // Not first launch, but user hasn't checked "don't ask again"
+            showSetDefaultDialog()
+        } else {
+            // User has checked "don't ask again" - go directly to camera
+            requestPermissionsAndOpenCamera()
         }
     }
     
@@ -107,18 +116,37 @@ class MainActivity : AppCompatActivity() {
     }
     
     private fun showSetDefaultDialog() {
+        // Inflate custom layout with checkbox
+        val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_default_camera, null)
+        val checkBox = dialogView.findViewById<CheckBox>(R.id.cbDontAskAgain)
+        
         AlertDialog.Builder(this)
             .setTitle(getString(R.string.set_as_default_camera))
-            .setMessage(getString(R.string.set_as_default_message))
-            .setPositiveButton(getString(R.string.yes)) { _, _ ->
+            .setView(dialogView)
+            .setPositiveButton(getString(R.string.yes)) { dialog, _ ->
+                // Save the checkbox state
+                if (checkBox.isChecked) {
+                    preferencesManager.setDontAskAgainDefault(true)
+                }
                 openDefaultAppSettings()
+                dialog.dismiss()
             }
             .setNegativeButton(getString(R.string.no)) { dialog, _ ->
+                // Save the checkbox state
+                if (checkBox.isChecked) {
+                    preferencesManager.setDontAskAgainDefault(true)
+                }
+                // Go directly to camera
+                requestPermissionsAndOpenCamera()
                 dialog.dismiss()
             }
             .setNeutralButton(getString(R.string.later)) { dialog, _ ->
+                // Don't save checkbox state for "Later" - ask again next time
+                // Go directly to camera
+                requestPermissionsAndOpenCamera()
                 dialog.dismiss()
             }
+            .setCancelable(false)
             .show()
     }
     

@@ -1,6 +1,7 @@
 package com.fotocammera
 
 import android.Manifest
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
@@ -151,19 +152,129 @@ class MainActivity : AppCompatActivity() {
     }
     
     private fun openDefaultAppSettings() {
-        try {
-            val intent = Intent(Settings.ACTION_MANAGE_DEFAULT_APPS_SETTINGS)
-            startActivity(intent)
-        } catch (e: Exception) {
-            // Fallback to general settings
-            val intent = Intent(Settings.ACTION_APPLICATION_SETTINGS)
-            startActivity(intent)
+        // Try multiple approaches to help user set as default camera
+        showDefaultAppInstructions()
+    }
+    
+    private fun showDefaultAppInstructions() {
+        val instructions = """
+To set FotoCamera as your default camera app:
+
+EASIEST METHOD - Test Camera Choice:
+• Tap "Test Camera Choice" below
+• Select "FotoCamera" 
+• Tap "Always" (NOT "Just once")
+
+SETTINGS METHOD (varies by phone):
+📱 Samsung: Settings → Apps → Choose default apps → Camera app
+📱 Google/Pixel: Settings → Apps → Default apps → Camera app  
+📱 OnePlus: Settings → Apps → App management → Default app settings → Camera
+📱 Xiaomi/MIUI: Settings → Manage apps → Permissions → Camera → Choose default
+📱 Huawei: Settings → Apps → Default apps → Camera
+📱 General: Settings → Apps → Default apps → Camera
+
+ALTERNATIVE METHOD:
+• Open any app that needs camera (WhatsApp, Instagram)
+• When it asks for camera permission, choose "FotoCamera"
+• Select "Always" instead of "Just once"
+        """.trimIndent()
+        
+        AlertDialog.Builder(this)
+            .setTitle("How to Set as Default Camera")
+            .setMessage(instructions)
+            .setPositiveButton("Open Settings") { _, _ ->
+                tryOpenDefaultAppSettings()
+            }
+            .setNegativeButton("Got it") { dialog, _ ->
+                dialog.dismiss()
+                // Still open camera so user can use the app
+                requestPermissionsAndOpenCamera()
+            }
+            .setNeutralButton("Test Camera Choice") { _, _ ->
+                testCameraAppSelection()
+            }
+            .show()
+    }
+    
+    private fun tryOpenDefaultAppSettings() {
+        // Try different settings screens in order of preference
+        val settingsIntents = listOf(
+            // Try direct default apps first
+            Intent(Settings.ACTION_MANAGE_DEFAULT_APPS_SETTINGS),
+            // Try application details for this app
+            Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                data = Uri.fromParts("package", packageName, null)
+            },
+            // Try general app settings
+            Intent(Settings.ACTION_APPLICATION_SETTINGS),
+            // Fallback to main settings
+            Intent(Settings.ACTION_SETTINGS)
+        )
+        
+        var settingsOpened = false
+        for (intent in settingsIntents) {
+            try {
+                startActivity(intent)
+                settingsOpened = true
+                showSettingsGuidance()
+                break
+            } catch (e: Exception) {
+                // Continue to next option
+                continue
+            }
+        }
+        
+        if (!settingsOpened) {
             Toast.makeText(
                 this,
-                "Please find 'Default apps' and set FotoCamera as default camera",
+                "Please manually open Settings and look for 'Default apps' or 'App preferences'",
                 Toast.LENGTH_LONG
             ).show()
+            // Still open camera
+            requestPermissionsAndOpenCamera()
         }
+    }
+    
+    private fun showSettingsGuidance() {
+        Toast.makeText(
+            this,
+            "Look for: Default apps → Camera, or Apps → FotoCamera → Open by default",
+            Toast.LENGTH_LONG
+        ).show()
+    }
+    
+    private fun copyInstructionsToClipboard(instructions: String) {
+        try {
+            val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
+            val clip = android.content.ClipData.newPlainText("Default Camera Instructions", instructions)
+            clipboard.setPrimaryClip(clip)
+            Toast.makeText(this, "Instructions copied to clipboard!", Toast.LENGTH_SHORT).show()
+        } catch (e: Exception) {
+            Toast.makeText(this, "Could not copy to clipboard", Toast.LENGTH_SHORT).show()
+        }
+    }
+    
+    private fun testCameraAppSelection() {
+        try {
+            // This will trigger the system to show camera app selection dialog
+            val intent = Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE)
+            // Don't set any specific app - let the system show all camera apps
+            if (intent.resolveActivity(packageManager) != null) {
+                startActivity(Intent.createChooser(intent, "Choose Camera App (Select FotoCamera and tap 'Always')"))
+                Toast.makeText(
+                    this,
+                    "Select 'FotoCamera' and tap 'Always' to set as default!",
+                    Toast.LENGTH_LONG
+                ).show()
+            } else {
+                // Fallback to our camera
+                requestPermissionsAndOpenCamera()
+            }
+        } catch (e: Exception) {
+            Toast.makeText(this, "Could not test camera selection", Toast.LENGTH_SHORT).show()
+            requestPermissionsAndOpenCamera()
+        }
+    }
     }
     
     private fun showPermissionDeniedDialog() {

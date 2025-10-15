@@ -1,6 +1,7 @@
 package com.fotocammera
 
 import android.content.ContentValues
+import android.content.res.Configuration
 import android.graphics.*
 import android.os.Bundle
 import android.os.Environment
@@ -11,6 +12,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
+import androidx.exifinterface.media.ExifInterface
 import com.fotocammera.databinding.ActivityCameraBinding
 import com.fotocammera.utils.PreferencesManager
 import java.io.File
@@ -46,6 +48,13 @@ class CameraActivity : AppCompatActivity() {
         
         cameraExecutor = Executors.newSingleThreadExecutor()
         startCamera()
+    }
+    
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        // The ConstraintLayout will automatically reposition the overlay
+        // to bottom-right corner for both portrait and landscape
+        Log.d(TAG, "Configuration changed to: ${if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) "Landscape" else "Portrait"}")
     }
     
     private fun setupClickListeners() {
@@ -190,16 +199,26 @@ class CameraActivity : AppCompatActivity() {
             inputStream?.close()
             
             if (originalBitmap != null) {
+                // Log image dimensions for debugging
+                Log.d(TAG, "Image dimensions: ${originalBitmap.width} x ${originalBitmap.height}")
+                
                 // Create a mutable copy
                 val mutableBitmap = originalBitmap.copy(Bitmap.Config.ARGB_8888, true)
                 val canvas = Canvas(mutableBitmap)
                 
-                // Calculate number display position (bottom right corner - no margin)
-                val numberWidth = 616  // Added 40px more width (576 + 40)
-                val numberHeight = 328 // Added 40px more height (288 + 40)
-                val margin = 0         // Changed from 50 to 0
+                // Calculate number display position (bottom right corner)
+                // Scale overlay size based on image dimensions for better visibility
+                val scaleFactor = minOf(originalBitmap.width, originalBitmap.height) / 1000f
+                val baseWidth = 616
+                val baseHeight = 328
+                val numberWidth = (baseWidth * scaleFactor).toInt().coerceAtLeast(300)
+                val numberHeight = (baseHeight * scaleFactor).toInt().coerceAtLeast(150)
+                
+                val margin = 20 // Small margin from edges
                 val x = mutableBitmap.width - numberWidth - margin
                 val y = mutableBitmap.height - numberHeight - margin
+                
+                Log.d(TAG, "Overlay position: ($x, $y), size: ${numberWidth}x${numberHeight}")
                 
                 // Draw number background and text
                 drawNumberOverlay(canvas, x.toFloat(), y.toFloat(), numberWidth, numberHeight)

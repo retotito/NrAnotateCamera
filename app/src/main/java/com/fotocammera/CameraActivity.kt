@@ -12,7 +12,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
-import androidx.exifinterface.media.ExifInterface
 import com.fotocammera.databinding.ActivityCameraBinding
 import com.fotocammera.utils.PreferencesManager
 import java.io.File

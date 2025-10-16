@@ -196,7 +196,7 @@ class CameraActivity : AppCompatActivity() {
     }
     
     private fun generateFileName(): String {
-        val dateFormat = SimpleDateFormat("dd.MM-HH:mm", Locale.getDefault())
+        val dateFormat = SimpleDateFormat("dd.MM-HH:mm:ss", Locale.getDefault())
         val timestamp = dateFormat.format(Date())
         return "$currentDisplayNumber-$timestamp.jpg"
     }

@@ -4,7 +4,7 @@
     <string name="storage_permission_required">Storage permission is required to save photos</string>
     <string name="permission_denied">Permission denied. Please enable camera and storage permissions in settings.</string>
     <string name="change_number">Change Number</string>
-    <string name="select_number">Select 4-digit number</string>
+    <string name="select_number">A-Nummer</string>
     <string name="ok">OK</string>
     <string name="cancel">Cancel</string>
     <string name="photo_saved">Photo saved</string>

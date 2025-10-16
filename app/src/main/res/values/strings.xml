@@ -9,5 +9,6 @@
     <string name="cancel">Cancel</string>
     <string name="photo_saved">Photo saved</string>
     <string name="photo_save_error">Error saving photo</string>
+    <string name="saving_photo">Saving photo...</string>
     <string name="default_number">0000</string>
 </resources>

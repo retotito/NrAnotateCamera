@@ -131,6 +131,9 @@ class CameraActivity : AppCompatActivity() {
     private fun takePhoto() {
         val imageCapture = imageCapture ?: return
         
+        // Show loading overlay to block user interactions
+        showLoadingOverlay()
+        
         // Capture current orientation for overlay positioning
         val currentOrientation = resources.configuration.orientation
         
@@ -159,6 +162,7 @@ class CameraActivity : AppCompatActivity() {
             object : ImageCapture.OnImageSavedCallback {
                 override fun onError(exception: ImageCaptureException) {
                     Log.e(TAG, "Photo capture failed: ${exception.message}", exception)
+                    hideLoadingOverlay()
                     Toast.makeText(
                         this@CameraActivity,
                         getString(R.string.photo_save_error),
@@ -183,6 +187,7 @@ class CameraActivity : AppCompatActivity() {
                         notifyMediaScanner(uri)
                     }
                     
+                    hideLoadingOverlay()
                     val msg = "${getString(R.string.photo_saved)}: ${generateFileName()}"
                     Toast.makeText(this@CameraActivity, msg, Toast.LENGTH_LONG).show()
                 }
@@ -303,6 +308,24 @@ class CameraActivity : AppCompatActivity() {
         } catch (e: Exception) {
             Log.e(TAG, "Error notifying media scanner", e)
         }
+    }
+    
+    /**
+     * Show loading overlay to block user interactions during photo saving
+     */
+    private fun showLoadingOverlay() {
+        binding.loadingOverlay.visibility = android.view.View.VISIBLE
+        binding.btnCapture.isClickable = false
+        binding.llNumberDisplay.isClickable = false
+    }
+    
+    /**
+     * Hide loading overlay and re-enable user interactions
+     */
+    private fun hideLoadingOverlay() {
+        binding.loadingOverlay.visibility = android.view.View.GONE
+        binding.btnCapture.isClickable = true
+        binding.llNumberDisplay.isClickable = true
     }
     
     override fun onDestroy() {

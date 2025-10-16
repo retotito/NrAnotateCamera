@@ -56,6 +56,9 @@ dependencies {
     // Preferences
     implementation 'androidx.preference:preference-ktx:1.2.1'
 
+    // EXIF interface for image orientation handling
+    implementation 'androidx.exifinterface:exifinterface:1.3.6'
+
     // Number Picker - using Android's built-in NumberPicker
     // No external dependency needed
 

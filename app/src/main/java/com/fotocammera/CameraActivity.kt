@@ -1,12 +1,15 @@
 package com.fotocammera
 
 import android.content.ContentValues
+import android.content.Context
 import android.content.res.Configuration
 import android.graphics.*
 import android.os.Bundle
 import android.os.Environment
 import android.provider.MediaStore
 import android.util.Log
+import android.view.Surface
+import android.view.WindowManager
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.camera.core.*
@@ -134,8 +137,34 @@ class CameraActivity : AppCompatActivity() {
         // Show loading overlay to block user interactions
         showLoadingOverlay()
         
-        // Capture current orientation for overlay positioning
+        // Get actual device rotation from window manager for better orientation handling
+        val windowManager = getSystemService(Context.WINDOW_SERVICE) as WindowManager
+        val actualRotation = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
+            display?.rotation ?: Surface.ROTATION_0
+        } else {
+            @Suppress("DEPRECATION")
+            windowManager.defaultDisplay.rotation
+        }
+        
+        // Use device orientation to determine proper rotation
+        val deviceOrientation = resources.configuration.orientation
+        val targetRotation = when {
+            deviceOrientation == Configuration.ORIENTATION_PORTRAIT && actualRotation == Surface.ROTATION_0 -> Surface.ROTATION_0
+            deviceOrientation == Configuration.ORIENTATION_PORTRAIT && actualRotation == Surface.ROTATION_180 -> Surface.ROTATION_180  
+            deviceOrientation == Configuration.ORIENTATION_LANDSCAPE && actualRotation == Surface.ROTATION_90 -> Surface.ROTATION_90
+            deviceOrientation == Configuration.ORIENTATION_LANDSCAPE && actualRotation == Surface.ROTATION_270 -> Surface.ROTATION_270
+            else -> actualRotation
+        }
+        
+        imageCapture.targetRotation = targetRotation
+        
+        // Capture current orientation for overlay positioning  
         val currentOrientation = resources.configuration.orientation
+        
+        Log.d(TAG, "Device orientation: ${if (deviceOrientation == Configuration.ORIENTATION_PORTRAIT) "PORTRAIT" else "LANDSCAPE"}")
+        Log.d(TAG, "Actual rotation: $actualRotation")
+        Log.d(TAG, "Target rotation set to: $targetRotation")
+        Log.d(TAG, "Configuration orientation: $currentOrientation")
         
         // Create time stamped name and MediaStore entry
         val name = generateFileName()
@@ -202,26 +231,57 @@ class CameraActivity : AppCompatActivity() {
     
     private fun addNumberOverlayToImage(imageUri: android.net.Uri, deviceOrientation: Int) {
         try {
+            // Read EXIF data to check rotation
+            val inputStreamExif = contentResolver.openInputStream(imageUri)
+            val exif = androidx.exifinterface.media.ExifInterface(inputStreamExif!!)
+            inputStreamExif.close()
+            
+            val exifOrientation = exif.getAttributeInt(
+                androidx.exifinterface.media.ExifInterface.TAG_ORIENTATION,
+                androidx.exifinterface.media.ExifInterface.ORIENTATION_NORMAL
+            )
+            
             // Read the original image
             val inputStream = contentResolver.openInputStream(imageUri)
             val originalBitmap = BitmapFactory.decodeStream(inputStream)
             inputStream?.close()
             
             if (originalBitmap != null) {
-                val imageWidth = originalBitmap.width
-                val imageHeight = originalBitmap.height
-                val isImageLandscape = imageWidth > imageHeight
-                val isDeviceLandscape = deviceOrientation == Configuration.ORIENTATION_LANDSCAPE
+                Log.d(TAG, "Original image dimensions: ${originalBitmap.width} x ${originalBitmap.height}")
+                Log.d(TAG, "Device orientation: ${if (deviceOrientation == Configuration.ORIENTATION_LANDSCAPE) "landscape" else "portrait"}")
+                Log.d(TAG, "EXIF orientation: $exifOrientation")
                 
-                Log.d(TAG, "Image dimensions: ${imageWidth} x ${imageHeight} (${if (isImageLandscape) "landscape" else "portrait"})")
-                Log.d(TAG, "Device orientation: ${if (isDeviceLandscape) "landscape" else "portrait"}")
+                // Actually rotate the bitmap based on EXIF orientation
+                val rotatedBitmap = when (exifOrientation) {
+                    androidx.exifinterface.media.ExifInterface.ORIENTATION_ROTATE_90 -> {
+                        Log.d(TAG, "Rotating image 90 degrees")
+                        rotateBitmap(originalBitmap, 90f)
+                    }
+                    androidx.exifinterface.media.ExifInterface.ORIENTATION_ROTATE_180 -> {
+                        Log.d(TAG, "Rotating image 180 degrees")
+                        rotateBitmap(originalBitmap, 180f)
+                    }
+                    androidx.exifinterface.media.ExifInterface.ORIENTATION_ROTATE_270 -> {
+                        Log.d(TAG, "Rotating image 270 degrees")
+                        rotateBitmap(originalBitmap, 270f)
+                    }
+                    else -> {
+                        Log.d(TAG, "No rotation needed")
+                        originalBitmap
+                    }
+                }
                 
-                // Create a mutable copy
-                val mutableBitmap = originalBitmap.copy(Bitmap.Config.ARGB_8888, true)
+                val finalWidth = rotatedBitmap.width
+                val finalHeight = rotatedBitmap.height
+                
+                Log.d(TAG, "Final image dimensions after rotation: ${finalWidth} x ${finalHeight}")
+                
+                // Create a mutable copy of the rotated bitmap
+                val mutableBitmap = rotatedBitmap.copy(Bitmap.Config.ARGB_8888, true)
                 val canvas = Canvas(mutableBitmap)
                 
-                // Calculate overlay size - further reduced by 35% from previous size
-                val scaleFactor = minOf(imageWidth, imageHeight) / 1000f
+                // Calculate overlay size based on final rotated dimensions
+                val scaleFactor = minOf(finalWidth, finalHeight) / 1000f
                 val baseWidth = (616 * 0.6 * 0.65).toInt()  // 40% + 35% reduction: 616 * 0.6 * 0.65 = 240
                 val baseHeight = (328 * 0.6 * 0.65).toInt() // 40% + 35% reduction: 328 * 0.6 * 0.65 = 128
                 val numberWidth = (baseWidth * scaleFactor).toInt().coerceAtLeast(120)  // Further reduced minimum
@@ -229,23 +289,28 @@ class CameraActivity : AppCompatActivity() {
                 
                 val margin = 20 // Small margin from edges
                 
-                // Always position in bottom-right of the actual saved image
-                val x = imageWidth - numberWidth - margin
-                val y = imageHeight - numberHeight - margin
+                // Position based on final rotated image dimensions
+                val x = finalWidth - numberWidth - margin
+                val y = finalHeight - numberHeight - margin
                 
                 Log.d(TAG, "Overlay position: ($x, $y), size: ${numberWidth}x${numberHeight}")
-                Log.d(TAG, "Device vs Image orientation match: ${isDeviceLandscape == isImageLandscape}")
+                Log.d(TAG, "Using rotated image dimensions: ${finalWidth}x${finalHeight}")
                 
                 // Draw number background and text
                 drawNumberOverlay(canvas, x.toFloat(), y.toFloat(), numberWidth, numberHeight)
                 
-                // Save the modified image back
+                // Save the modified image back (now physically rotated correctly)
                 val outputStream = contentResolver.openOutputStream(imageUri)
                 outputStream?.use {
                     mutableBitmap.compress(Bitmap.CompressFormat.JPEG, 95, it)
                 }
                 
-                originalBitmap.recycle()
+                Log.d(TAG, "Image saved with physical rotation applied")
+                
+                // Clean up bitmaps
+                if (rotatedBitmap != originalBitmap) {
+                    originalBitmap.recycle()
+                }
                 mutableBitmap.recycle()
             }
         } catch (e: Exception) {
@@ -347,6 +412,15 @@ class CameraActivity : AppCompatActivity() {
         binding.successOverlay.visibility = android.view.View.GONE
     }
     
+    /**
+     * Rotate a bitmap by the specified degrees
+     */
+    private fun rotateBitmap(source: Bitmap, degrees: Float): Bitmap {
+        val matrix = Matrix()
+        matrix.postRotate(degrees)
+        return Bitmap.createBitmap(source, 0, 0, source.width, source.height, matrix, true)
+    }
+
     override fun onDestroy() {
         super.onDestroy()
         cameraExecutor.shutdown()

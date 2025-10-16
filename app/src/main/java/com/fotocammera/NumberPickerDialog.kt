@@ -54,23 +54,6 @@ class NumberPickerDialog(
             maxValue = 9
             value = initialValue
             wrapSelectorWheel = true
-            
-            // Try to set text size and color (may not work on all devices)
-            try {
-                val fields = NumberPicker::class.java.declaredFields
-                for (field in fields) {
-                    if (field.name == "mInputText") {
-                        field.isAccessible = true
-                        val inputText = field.get(this) as? android.widget.EditText
-                        inputText?.textSize = 24f
-                        inputText?.setTextColor(android.graphics.Color.WHITE)
-                        inputText?.typeface = android.graphics.Typeface.DEFAULT_BOLD
-                        break
-                    }
-                }
-            } catch (e: Exception) {
-                // Ignore if styling fails
-            }
         }
     }
     

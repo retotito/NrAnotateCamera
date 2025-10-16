@@ -20,35 +20,19 @@
         android:orientation="horizontal"
         android:gravity="center">
 
-        <!-- First digit picker with red background -->
-        <FrameLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="4dp"
-            android:background="@drawable/number_picker_red_background"
-            android:padding="8dp">
-            
-            <NumberPicker
-                android:id="@+id/npFirstDigit"
-                android:layout_width="60dp"
-                android:layout_height="120dp"
-                android:theme="@style/NumberPickerStyle" />
-        </FrameLayout>
+        <!-- First digit picker -->
+        <NumberPicker
+            android:id="@+id/npFirstDigit"
+            android:layout_width="60dp"
+            android:layout_height="120dp"
+            android:layout_margin="4dp" />
 
-        <!-- Second digit picker with red background -->
-        <FrameLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="4dp"
-            android:background="@drawable/number_picker_red_background"
-            android:padding="8dp">
-            
-            <NumberPicker
-                android:id="@+id/npSecondDigit"
-                android:layout_width="60dp"
-                android:layout_height="120dp"
-                android:theme="@style/NumberPickerStyle" />
-        </FrameLayout>
+        <!-- Second digit picker -->
+        <NumberPicker
+            android:id="@+id/npSecondDigit"
+            android:layout_width="60dp"
+            android:layout_height="120dp"
+            android:layout_margin="4dp" />
 
         <!-- Separator -->
         <View
@@ -57,35 +41,19 @@
             android:background="@color/black"
             android:layout_margin="8dp" />
 
-        <!-- Third digit picker with blue background -->
-        <FrameLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="4dp"
-            android:background="@drawable/number_picker_blue_background"
-            android:padding="8dp">
-            
-            <NumberPicker
-                android:id="@+id/npThirdDigit"
-                android:layout_width="60dp"
-                android:layout_height="120dp"
-                android:theme="@style/NumberPickerStyle" />
-        </FrameLayout>
+        <!-- Third digit picker -->
+        <NumberPicker
+            android:id="@+id/npThirdDigit"
+            android:layout_width="60dp"
+            android:layout_height="120dp"
+            android:layout_margin="4dp" />
 
-        <!-- Fourth digit picker with blue background -->
-        <FrameLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="4dp"
-            android:background="@drawable/number_picker_blue_background"
-            android:padding="8dp">
-            
-            <NumberPicker
-                android:id="@+id/npFourthDigit"
-                android:layout_width="60dp"
-                android:layout_height="120dp"
-                android:theme="@style/NumberPickerStyle" />
-        </FrameLayout>
+        <!-- Fourth digit picker -->
+        <NumberPicker
+            android:id="@+id/npFourthDigit"
+            android:layout_width="60dp"
+            android:layout_height="120dp"
+            android:layout_margin="4dp" />
 
     </LinearLayout>
 

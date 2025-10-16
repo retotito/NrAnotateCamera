@@ -123,4 +123,65 @@
 
     </FrameLayout>
 
+    <!-- Success Overlay -->
+    <FrameLayout
+        android:id="@+id/successOverlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#80000000"
+        android:clickable="true"
+        android:focusable="true"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <!-- Success Content -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:background="@drawable/loading_background"
+            android:orientation="vertical"
+            android:padding="32dp">
+
+            <!-- Success Icon -->
+            <TextView
+                android:id="@+id/tvSuccessIcon"
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:layout_gravity="center"
+                android:background="@drawable/circle_success"
+                android:gravity="center"
+                android:text="✓"
+                android:textColor="@color/white"
+                android:textSize="32sp" />
+
+            <!-- Success Text -->
+            <TextView
+                android:id="@+id/tvSuccessText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginTop="16dp"
+                android:text="@string/photo_saved"
+                android:textColor="@color/white"
+                android:textSize="16sp" />
+
+            <!-- Filename Text -->
+            <TextView
+                android:id="@+id/tvSuccessFilename"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginTop="8dp"
+                android:textColor="@color/white"
+                android:textSize="14sp"
+                android:alpha="0.8" />
+
+        </LinearLayout>
+
+    </FrameLayout>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -188,8 +188,7 @@ class CameraActivity : AppCompatActivity() {
                     }
                     
                     hideLoadingOverlay()
-                    val msg = "${getString(R.string.photo_saved)}: ${generateFileName()}"
-                    Toast.makeText(this@CameraActivity, msg, Toast.LENGTH_LONG).show()
+                    showSuccessOverlay(generateFileName())
                 }
             }
         )
@@ -326,6 +325,26 @@ class CameraActivity : AppCompatActivity() {
         binding.loadingOverlay.visibility = android.view.View.GONE
         binding.btnCapture.isClickable = true
         binding.llNumberDisplay.isClickable = true
+    }
+    
+    /**
+     * Show success overlay with filename and auto-hide after delay
+     */
+    private fun showSuccessOverlay(filename: String) {
+        binding.tvSuccessFilename.text = filename
+        binding.successOverlay.visibility = android.view.View.VISIBLE
+        
+        // Auto-hide after 2 seconds
+        binding.successOverlay.postDelayed({
+            hideSuccessOverlay()
+        }, 2000)
+    }
+    
+    /**
+     * Hide success overlay
+     */
+    private fun hideSuccessOverlay() {
+        binding.successOverlay.visibility = android.view.View.GONE
     }
     
     override fun onDestroy() {

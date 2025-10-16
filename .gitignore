@@ -15,6 +15,9 @@
 .cxx
 local.properties
 
+# App build directory with all subdirectories
+app/build/
+
 # User-specific files
 *.rsuser
 *.suo

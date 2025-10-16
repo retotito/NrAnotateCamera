@@ -1,3 +1,0 @@
-com.fotocammera.test
-style WhiteBackgroundDialogTheme
-style WhiteBackgroundTheme

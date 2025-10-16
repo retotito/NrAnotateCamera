@@ -3,13 +3,6 @@
     <string name="camera_permission_required">Camera permission is required to use this app</string>
     <string name="storage_permission_required">Storage permission is required to save photos</string>
     <string name="permission_denied">Permission denied. Please enable camera and storage permissions in settings.</string>
-    <string name="set_as_default_camera">Set as Default Camera</string>
-    <string name="set_as_default_message">Would you like to set FotoCamera as your default camera app?</string>
-    <string name="yes">Yes</string>
-    <string name="no">No</string>
-    <string name="later">Later</string>
-    <string name="dont_ask_again">Don\'t ask again</string>
-    <string name="open_camera">Open Camera</string>
     <string name="change_number">Change Number</string>
     <string name="select_number">Select 4-digit number</string>
     <string name="ok">OK</string>

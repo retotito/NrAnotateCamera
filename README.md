@@ -55,6 +55,3 @@ A  Android camera application built with Kotlin that allows users to add customi
 
 This project is licensed under the MIT License - see the LICENSE file for details.
 
-## Support
-
-For support, email support@fotocamera.com or create an issue in this repository.
